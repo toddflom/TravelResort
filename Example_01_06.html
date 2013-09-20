@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Example 7 (Generating a 2500 × 2500 grid)</title>
+		
+	<script src="/js/timer.js" charset="utf-8"></script>
+    <script src="/js/sprite.js" charset="utf-8"></script>		
+		<script type="text/javascript">
+			window.onload = function () {
+				var tileMap = [];
+				
+				var tile = {
+					width: 3,
+					height:3
+				}
+				
+				var grid = {
+					width: 100,
+					height: 100				
+				}
+				
+				var Keys = {
+					UP: 38,
+					DOWN: 40,
+					LEFT: 37,
+					RIGHT: 39
+				}
+				
+				var scroll = {
+					x: 0,
+					y: 0
+				}
+				
+				var canvas = document.getElementById('myCanvas');
+				var c = canvas.getContext('2d');
+				
+				var man1 = new Sprite('/img/char1.png', 32, 32, 0, 96, 4, 200);
+				var man2 = new Sprite('/img/char2.png', 32, 32, 0, 224, 6, 400);
+				var man3 = new Sprite('/img/char3.png', 32, 32, 0, 128, 4, 600);
+				
+				var timer = new Timer();
+				
+				// Draw the entire grid
+				draw();
+				displayAnimatedSprites();
+				
+				function displayAnimatedSprites() {
+					timer.update();
+					
+					man1.setPosition(120, 60);
+					man2.setPosition(120, 102);
+					man3.setPosition(120, 141);
+					
+					// Redraw just the area of the grid being changed
+					draw(man1.posX, man1.posY, man1.width, man1.height);
+					draw(man2.posX, man2.posY, man2.width, man2.height);
+					draw(man3.posX, man3.posY, man3.width, man3.height);
+					
+					man1.animate(c, timer);
+					man2.animate(c, timer);
+					man3.animate(c, timer);
+					
+					setTimeout(function () {
+						displayAnimatedSprites(timer.getSeconds());
+					}, 100);
+				}
+				
+				canvas.addEventListener('click', handleClick, false);
+				window.addEventListener('keydown', handleKeyDown, false);
+				
+
+				
+				function handleClick(e) {
+					// When a click is directed, translate the mouse
+					// coordinates to pixel coordinates
+					var row = Math.floor((e.clientX + scroll.x) / tile.width);
+					var column = Math.floor((e.clientY + scroll.y) / tile.height);
+					
+					if (tileMap[row] == null) {
+						tileMap[row] = [];						
+					}
+					tileMap[row][column] = 1;
+				}
+				
+				function handleKeyDown(e) {
+					switch (e.keyCode) {
+						case Keys.UP:
+							scroll.y -= ((scroll.y - tile.height) >= 0) ? tile.height : 0;
+							break;
+						case Keys.DOWN:
+							scroll.y += tile.height;
+							break;
+						case Keys.LEFT:
+							scroll.x -= ((scroll.x - tile.width) >= 0) ? tile.width : 0;
+							break;
+						case Keys.RIGHT:
+							scroll.x += tile.width;
+							break;
+					}
+					
+					document.getElementById('scrollx').innerHTML = scroll.x;
+					document.getElementById('scrolly').innerHTML = scroll.y
+					
+				}
+				
+				
+				
+				function draw(srcX, srcY, destX, destY) {
+					srcX = (srcX === undefined) ? 0 : srcX;
+					srcY = (srcY === undefined) ? 0 : srcY;
+					destX = (destX === undefined) ? canvas.width : destX;
+					destY = (destY === undefined) ? canvas.height : destY;
+					
+					c.fillStyle = '#FFFFFF';
+					c.fillRect(srcX, srcY, destX + 1, destY + 1);
+					c.fillStyle = '#000000';
+					
+					var startRow = 0;
+					var startCol = 0;
+					var rowCount = startRow + Math.floor(canvas.width / tile.width) + 1;
+					var colCount = startCol + Math.floor(canvas.height / tile.height) + 1;
+					
+					//  if we want to force the grid to not scroll beyond the 2,500×2,500 boundary,
+					rowCount = ((startRow + rowCount) > grid.width) ? grid.width : rowCount;
+					// console.log(startRow + rowCount);
+					colCount = ((startCol + colCount) > grid.height) ? grid.height : colCount;
+					
+					for (var row = startRow; row < rowCount; row++) {
+						for (var col = startCol; col < colCount; col++) {
+							var tilePositionX = tile.width * row;
+							var tilePositionY = tile.height * col;
+							
+							tilePositionX -= scroll.x;
+							tilePositionY -= scroll.y;
+							
+							if (tilePositionX >= srcX && tilePositionY >= srcY && 
+									tilePositionX <= (srcX + destX) &&
+									tilePositionY <= (srcY + destY)) {
+								c.strokeStyle = '#CCCCCC';
+								c.strokeRect(tilePositionX, tilePositionY, tile.width, tile.height);
+
+							}
+						}
+					}
+					
+				}
+
+			}
+		</script>
+		
+		
+		
+		
+	</head>
+	<body>
+		<canvas id='myCanvas' width='300' height='300'></canvas>
+		<br />
+		User the UP, DOWN, LEFT and RIGHT keys to scroll
+		<br />
+		Scroll X: <span id='scrollx'>0</span><br />
+		Scroll Y: <span id='scrolly'>0</span>
+	</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
